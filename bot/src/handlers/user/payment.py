@@ -6,8 +6,6 @@ from aiogram.exceptions import TelegramBadRequest
 import httpx
 from datetime import datetime
 
-from paytechuz.gateways.click import ClickGateway
-
 from src.utils.callbackdata import UserMenuCallback
 from src.utils.keyboards import user_builder
 from src.utils.helper import build_cart_text
@@ -55,43 +53,41 @@ async def payment(call: CallbackQuery, callback_data: UserMenuCallback, db: MDB,
     }
     await db.orders.insert_one(order_data)
 
-    # SQLite (webhook server) ga ham orderni saqlash
+    # To'lov havolasini olish uchun veb-ilovaga so'rov yuborish
+    payment_link = None
     try:
         async with httpx.AsyncClient() as client:
-            await client.post(
-                "http://localhost:8000/api/create_order",
+            response = await client.post(
+                "http://bulvar.site/api/v1/orders",  # Domen nomingiz
                 json={
-                    "order_id": order_id,
-                    "user_id": user.id,
-                    "products": user.savat,
-                    "total_amount": float(total_amount),
-                    "status": "pending",
-                    "payment_method": "click"
+                    "product_name": f"Buyurtma #{order_id}",
+                    "amount": float(total_amount),
+                    "payment_method": "click",
+                    "description": f"Foydalanuvchi {user.id} tomonidan yaratilgan buyurtma"
                 },
-                timeout=5.0
+                timeout=10.0
             )
+            response.raise_for_status()  # Agar xatolik bo'lsa (4xx yoki 5xx)
+            data = response.json()
+            payment_link = data.get("payment_link")
+
+    except httpx.RequestError as e:
+        print(f"⚠️ Veb-ilovaga ulanishda xatolik: {e}")
+        await call.answer("❌ To'lov xizmatiga ulanib bo'lmadi. Iltimos, keyinroq qayta urinib ko'ring.", show_alert=True)
+        return
     except Exception as e:
-        print(f"⚠️ SQLite order creation failed: {e}")
+        print(f"⚠️ To'lov havolasini olishda noma'lum xatolik: {e}")
+        await call.answer("❌ Noma'lum xatolik yuz berdi.", show_alert=True)
+        return
 
-    # Click to'lov linkini yaratish
+    if not payment_link:
+        await call.answer("❌ To'lov havolasini yaratib bo'lmadi.", show_alert=True)
+        return
+
     try:
-        click = ClickGateway(
-            service_id=config.CLICK_SERVICE_ID,
-            merchant_id=config.CLICK_MERCHANT_ID,
-            merchant_user_id=config.CLICK_MERCHANT_USER_ID,
-            secret_key=config.CLICK_SECRET_KEY.get_secret_value() if config.CLICK_SECRET_KEY else "",
-            is_test_mode=config.CLICK_TEST_MODE
-        )
-        info = await bot.get_me()
-        payment_link = click.create_payment(
-            id=order_id,
-            amount=total_amount,
-            return_url=f"https://t.me/{info.username}  "  # O'z bot username'ingizni kiriting
-        )
-
         # To'lov tugmalarini yaratish
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="💳 Click orqali to'lash", url=payment_link.get("payment_url"))],
+            [InlineKeyboardButton(text="💳 Click orqali to'lash", url=payment_link)],
             [InlineKeyboardButton(
                 text="🔙 Orqaga",
                 callback_data=UserMenuCallback(section="cart").pack()

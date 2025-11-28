@@ -46,11 +46,16 @@ async def create_order(order_data: OrderCreate, db: Session = Depends(get_db)):
 
     payment_link = None
 
+    # To'lovdan keyin qaytish manzilini botning manziliga o'rnatish
+    # Bu ma'lumotni botning o'zidan olish yaxshiroq, lekin hozircha statik kiritamiz.
+    # Kelajakda bot so'rov yuborayotganda o'z manzilini ham yuborishi mumkin.
+    return_url = "https://t.me/your_bot_username"  # TODO: Bot username ni to'g'rilang
+
     if payment_method == "payme":
         payment_link = gateway.create_payment(
             id=str(db_invoice.id),
             amount=int(order_data.amount * 100),
-            return_url="https://example.com/return"
+            return_url=return_url
         )
 
     if payment_method == "click":
@@ -58,7 +63,7 @@ async def create_order(order_data: OrderCreate, db: Session = Depends(get_db)):
             id=str(db_invoice.id),
             amount=int(order_data.amount),
             description=db_order.product_name,
-            return_url="https://example.com/return"
+            return_url=return_url
         )
         payment_link = payment_result.get("payment_url")
 
