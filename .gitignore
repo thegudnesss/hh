@@ -1,0 +1,72 @@
+# ===== PYTHON =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Virtual Environment
+.venv/
+env/
+venv/
+
+# Python build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ===== ENV / CONFIG =====
+.env
+.env.*
+*.secret
+*.key
+*.pem
+*.crt
+
+# Sensitive data
+config.json
+keys/
+secrets/
+certs/
+
+# ===== AIROGRAM / FASTAPI SPECIFIC =====
+# Bot session files
+*.session
+*.session-journal
+
+# Media / Files uploaded by users
+media/
+uploads/
+
+# Cache
+.cache/
+*.log
+logs/
+
+# uvicorn reload cache
+.hotreload/
+
+# ===== MONGO / DB =====
+# Mongo dumps
+dump/
+*.bson
+*.gz
+
+# ===== IDE SETTINGS =====
+
+# PyCharm
+.idea/
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# ===== OS GENERATED =====
+.DS_Store
+Thumbs.db
+
+# ===== DOCKER =====
+docker-compose.override.yml
+docker-data/
+*.dockerfile
