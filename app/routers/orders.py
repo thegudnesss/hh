@@ -6,6 +6,7 @@ from app.gateways import get_gateways
 from app.models import Invoice, Order
 from app.typing import OrderCreate, PaymentResponse
 
+from bot.src.loader import bot
 
 router = APIRouter(
     prefix="/api/v1",
@@ -49,7 +50,8 @@ async def create_order(order_data: OrderCreate, db: Session = Depends(get_db)):
     # To'lovdan keyin qaytish manzilini botning manziliga o'rnatish
     # Bu ma'lumotni botning o'zidan olish yaxshiroq, lekin hozircha statik kiritamiz.
     # Kelajakda bot so'rov yuborayotganda o'z manzilini ham yuborishi mumkin.
-    return_url = "https://t.me/your_bot_username"  # TODO: Bot username ni to'g'rilang
+    info = await bot.get_me()
+    return_url = f"https://t.me/{info.username}"  # TODO: Bot username ni to'g'rilang
 
     if payment_method == "payme":
         payment_link = gateway.create_payment(
