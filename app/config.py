@@ -13,7 +13,7 @@ class ClickSettings(BaseSettings):
     CLICK_TEST_MODE: bool = False
 
     model_config = SettingsConfigDict(
-        env_file = "app/data/.env",
+        env_file = "data/.env",
         env_file_encoding="utf-8",
         case_sensitive=False,
     )

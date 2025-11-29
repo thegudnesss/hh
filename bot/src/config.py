@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     DB_CHANNEL: Optional[str] = None
 
     model_config = SettingsConfigDict(
-        env_file = "bot/data/.env",
+        env_file = "data/.env",
         env_file_encoding="utf-8",
         case_sensitive=False,
     )
