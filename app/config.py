@@ -5,6 +5,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class ClickSettings(BaseSettings):
+    BOT_TOKEN: SecretStr
+    MONGO_URL: SecretStr
+    DB_CHANNEL: Optional[str] = None
+    
     # Click Payment Settings
     CLICK_SERVICE_ID: Optional[str] = None
     CLICK_MERCHANT_ID: Optional[str] = None
@@ -13,7 +17,7 @@ class ClickSettings(BaseSettings):
     CLICK_TEST_MODE: bool = False
 
     model_config = SettingsConfigDict(
-        env_file = "data/.env",
+        env_file = ".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
     )
